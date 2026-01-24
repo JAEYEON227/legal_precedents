@@ -47,6 +47,6 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add data/data_kcs.json data/data_kcs_backup.json
+        git add data_kcs.json data_kcs_backup.json
         # 변경사항이 있을 때만 커밋
         git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update KCS data [skip ci]" && git push)
