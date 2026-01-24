@@ -12,3 +12,5 @@ test_*.py
 # Temporary and backup data files
 *temp*.json
 *backup*.json
+!data_kcs_backup.json
+!data_moleg_backup.json
