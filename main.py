@@ -554,16 +554,15 @@ with st.sidebar:
     st.markdown("""
     이 챗봇은 관세법 판례를 기반으로 답변을 생성합니다.
 
-    **데이터 소스**
-    - KCS 판례: 423건
-    - MOLEG 판례: 486건
-    - 총 909건의 판례 데이터
-
-    **시스템 구조**
-    - 6개의 AI 에이전트 병렬 실행
-    - Google Gemini 2.5 Flash 모델 사용
-    - Character n-gram TF-IDF 검색
-    - Multi-Agent 통합 답변 생성
+    **시스템 구조 및 Fallback 전략**
+    - **Query Expansion & Individual Agents**:
+      - Primary: Gemini 2.5 Flash
+      - Fallback: Gemini 2.5 Flash Lite
+    - **Head Agent (종합 분석)**:
+      - Primary: Gemini 3.0 Flash Preview (Experimental)
+      - Fallback 1: Gemini 2.5 Flash
+      - Fallback 2: Gemini 2.5 Flash Lite
+    - **검색 알고리즘**: Character n-gram TF-IDF
 
     **주요 장점**
     - 완전 무료 (Gemini API 무료 티어)
