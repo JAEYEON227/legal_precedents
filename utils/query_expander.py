@@ -7,7 +7,7 @@ import json
 import logging
 from pathlib import Path
 from google.genai import types
-
+from .ai.handler import generate_with_fallback
 
 def load_law_terms_dictionary(file_path=None):
     """법률 용어 사전 로드"""
@@ -57,8 +57,12 @@ def generate_similar_questions(client, user_query, law_terms):
 위 형식으로 3개 질문만 출력하세요."""
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
+        # Fallback 모델 리스트 정의
+        models = ["gemini-2.5-flash", "gemini-2.5-flash-lite"]
+        
+        response = generate_with_fallback(
+            client=client,
+            models=models,
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.7,
@@ -132,8 +136,12 @@ def extract_key_terms(client, user_query, law_terms):
 위 형식으로 핵심 용어만 출력하세요. 반드시 2개 이상 선택하세요."""
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash-exp",
+        # Fallback 모델 리스트 정의
+        models = ["gemini-2.5-flash", "gemini-2.5-flash-lite"]
+
+        response = generate_with_fallback(
+            client=client,
+            models=models,
             contents=prompt,
             config=types.GenerateContentConfig(
                 temperature=0.3,

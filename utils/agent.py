@@ -9,6 +9,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from google.genai import types
 from .vectorizer import search_relevant_data
+from .ai.handler import generate_with_fallback
 
 
 def get_agent_prompt(agent_type):
@@ -37,15 +38,24 @@ def get_agent_prompt(agent_type):
 # Role
 - 당신은 관세법 분야 전문성을 갖춘 법학 교수이자 여러 자료를 통합하여 종합적인 답변을 제공하는 전문가입니다.
 - 여러 에이전트로부터 받은 답변을 분석하고 통합하여 사용자의 질문에 가장 적합한 최종 답변을 제공합니다.
-- 주요 역할:
-    1. 서로 다른 정보 소스에서 나온 답변을 비교 분석
-    2. 가장 관련성 높은 정보 선별
-    3. 일관된 논리구조로 통합된 답변 생성
-    4. 중복 정보 제거 및 핵심 정보 강조
-    5. 이전 대화 맥락을 고려하여 답변 작성
+- **가장 중요한 목표**: 사용자에게 "종합적인 통찰"과 "구체적인 개별 사례 정보"를 모두 제공하는 것입니다. 요약에 치우치지 말고, 각 판례의 상세 내용을 충실히 전달하세요.
+
+# 주요 역할
+1. **종합 분석**: 서로 다른 정보 소스에서 나온 답변을 비교 분석하여 공통된 법리와 차이점을 도출합니다.
+2. **상세 정보 전달**: 각 에이전트가 제공한 중요 판례의 사실관계, 쟁점, 판단 근거를 **축약하지 말고 상세히** 기술합니다.
+3. **일관된 구성**: 논리적인 흐름으로 답변을 구성합니다.
+
+# 답변 구성 (반드시 이 구조를 따르세요)
+1. **종합 답변 (핵심 요약)**: 질문에 대한 직접적인 답변과 전체적인 법리 흐름을 요약합니다.
+2. **주요 쟁점별 상세 분석**: 쟁점별로 관련 판례들을 묶어서 설명하되, 각 판례의 고유한 사실관계와 법원의 판단을 구체적으로 서술합니다.
+    - 단순히 "A 판례는 B라고 했다"고 하지 말고, "A 판례(사건번호)에서는 [구체적 사실관계]에 대해 법원이 [구체적 근거]를 들어 [결론]이라고 판단하였다"와 같이 상세히 적으세요.
+3. **결론 및 시사점**: 사용자에게 주는 실무적 조언이나 결론을 제시합니다.
+4. **참조 판례 목록**: 인용된 모든 판례의 출처를 정확히 나열합니다.
+
+# 주의사항
 - 모든 답변은 두괄식으로 작성합니다.
 - 이전 대화에서 언급된 내용이 있다면 그것을 기억하고 관련 내용을 참조하여 응답합니다.
-- **중요**: 최종 답변 시 각 에이전트가 제시한 판례의 출처를 정리하여 명시하세요. 답변 마지막에 "참조 판례" 섹션을 추가하여 모든 출처를 나열하세요.
+- **제발 지나치게 요약하지 마세요.** 사용자는 판례의 구체적인 내용을 알고 싶어 합니다. 분량이 길어져도 좋으니 상세하게 설명하세요.
 """
 
 
@@ -94,9 +104,12 @@ def run_agent(client, agent_type, user_query, preprocessed_data, chunk_info, age
     logging.info(f"Agent {agent_index if agent_index else 'Head'} 실행 시작 (관련 데이터: {len(relevant_data)}건)")
 
     try:
-        # Gemini 모델 호출 - gemini-2.5-flash 모델 사용 (일반 에이전트)
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
+        # Gemini 모델 호출 - Fallback 적용 (2.5 Flash -> Lite)
+        models = ["gemini-2.5-flash", "gemini-2.5-flash-lite"]
+
+        response = generate_with_fallback(
+            client=client,
+            models=models,
             contents=full_prompt,
             config=types.GenerateContentConfig(
                 temperature=0.1,
@@ -248,9 +261,12 @@ def run_head_agent(client, agent_responses, user_query, conversation_history="")
     full_prompt = f"{prompt}{context_str}\n\n# 에이전트 응답\n{responses_str}\n\n# 질문\n{user_query}\n\n# 지시사항\n위 에이전트들의 응답을 통합하여 사용자의 질문에 가장 적합한 최종 답변을 작성하세요. 이전 대화 맥락을 고려하여 일관성 있게 응답하세요."
 
     try:
-        # Gemini 모델 호출
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
+        # Gemini 모델 호출 - Fallback 적용 (3 Preview -> 2.5 Flash -> Lite)
+        models = ["gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.5-flash-lite"]
+
+        response = generate_with_fallback(
+            client=client,
+            models=models,
             contents=full_prompt,
             config=types.GenerateContentConfig(
                 temperature=0.1,

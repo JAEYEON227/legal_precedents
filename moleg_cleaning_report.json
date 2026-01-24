@@ -1,0 +1,37 @@
+{
+  "processing_summary": {
+    "original_count": 89,
+    "deduplicated_count": 89,
+    "duplicates_removed": 0,
+    "final_count": 89
+  },
+  "deduplication_details": {
+    "removed_duplicates": []
+  },
+  "extraction_statistics": {
+    "선고일자": 76,
+    "법원명": 87,
+    "사건유형": 17,
+    "판결결과": 3
+  },
+  "extraction_success_rates": {
+    "선고일자": 85.39,
+    "법원명": 97.75,
+    "사건유형": 19.1,
+    "판결결과": 3.37
+  },
+  "baseline_date_info": {
+    "latest_date": "2025-04-24",
+    "extracted_dates_count": 76
+  },
+  "extracted_fields": [
+    "선고일자 (Decision date)",
+    "법원명 (Court name)",
+    "사건유형 (Case type)",
+    "판결요지 (Decision summary)",
+    "참조조문 (Referenced articles)",
+    "판결결과 (Decision result)"
+  ],
+  "timestamp": "2025-10-26T20:56:26.223469",
+  "backup_file": "C:\\Users\\kcs\\Documents\\legal_precedents\\data_moleg_temp.json_backup_20251026_205626"
+}
