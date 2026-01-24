@@ -150,7 +150,7 @@ def main():
         return
 
     # 3. 백업 생성
-    backup_file = PROJECT_ROOT / f"data_kcs_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    backup_file = PROJECT_ROOT / "data_kcs_backup.json"
     main_file = PROJECT_ROOT / 'data_kcs.json'
     if main_file.exists():
         try:

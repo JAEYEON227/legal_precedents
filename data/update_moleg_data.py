@@ -144,7 +144,7 @@ def main():
         return
 
     # 3. 백업 생성
-    backup_file = PROJECT_ROOT / f"data_moleg_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    backup_file = PROJECT_ROOT / "data_moleg_backup.json"
     main_file = PROJECT_ROOT / 'data_moleg.json'
     if main_file.exists():
         try:
