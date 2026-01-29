@@ -114,7 +114,8 @@ def format_precedent_summary(result: Dict[str, Any]) -> str:
     if source == 'kcs':
         summary_lines.append(f"사건번호: {data.get('사건번호', 'N/A')}")
         summary_lines.append(f"사건명: {data.get('사건명', 'N/A')}")
-        summary_lines.append(f"선고일자: {data.get('선고일자\n(종결일자)', 'N/A')}")
+        date_field = '선고일자\n(종결일자)'
+        summary_lines.append(f"선고일자: {data.get(date_field, 'N/A')}")
         summary_lines.append(f"처분청: {data.get('처분청', 'N/A')}")
         summary_lines.append(f"결과: {data.get('결과', 'N/A')}")
     else:  # moleg
