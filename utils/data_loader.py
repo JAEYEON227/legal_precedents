@@ -73,29 +73,48 @@ def save_vectorization_cache(preprocessed_data):
 
 
 def load_vectorization_cache():
-    """저장된 gzip 압축 벡터화 결과를 로드"""
+    """저장된 gzip 압축 벡터화 결과를 로드 (데이터 변경 감지 포함)"""
     cache_file = "vectorization_cache.pkl.gz"
-
-    # 하위 호환성: 기존 pkl 파일도 지원
     legacy_cache_file = "vectorization_cache.pkl"
-
+    
     try:
-        # gzip 압축 파일 우선 확인
+        # 1. 사용할 캐시 파일 결정
+        target_cache = None
         if os.path.exists(cache_file):
+            target_cache = cache_file
+        elif os.path.exists(legacy_cache_file):
+            target_cache = legacy_cache_file
+        
+        if not target_cache:
+            return None
+            
+        # 2. 데이터 파일과 수정 시간 비교 (캐시 유효성 검사)
+        cache_mtime = os.path.getmtime(target_cache)
+        data_files = ["data_kcs.json", "data_moleg.json"]
+        
+        for df in data_files:
+            if os.path.exists(df):
+                if os.path.getmtime(df) > cache_mtime:
+                    logging.info(f"데이터 파일({df})이 업데이트되었습니다. 캐시를 무효화하고 재생성합니다.")
+                    st.sidebar.warning(f"새로운 데이터가 감지되었습니다. 인덱스를 업데이트합니다.")
+                    return None
+
+        # 3. 캐시 로드
+        if target_cache == cache_file:
             with gzip.open(cache_file, 'rb') as f:
                 preprocessed_data = pickle.load(f)
             file_size = os.path.getsize(cache_file) / 1024 / 1024  # MB
             logging.info(f"벡터화 캐시 로드 완료: {cache_file} ({file_size:.2f} MB)")
             return preprocessed_data
-
-        # 기존 pkl 파일 확인 (하위 호환성)
-        elif os.path.exists(legacy_cache_file):
+            
+        elif target_cache == legacy_cache_file:
             with open(legacy_cache_file, 'rb') as f:
                 preprocessed_data = pickle.load(f)
             logging.info(f"레거시 캐시 로드 완료: {legacy_cache_file} (다음 저장 시 gzip으로 전환)")
             return preprocessed_data
 
         return None
+
     except Exception as e:
         logging.error(f"벡터화 캐시 로드 실패: {str(e)}")
         return None

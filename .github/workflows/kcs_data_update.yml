@@ -43,10 +43,15 @@ jobs:
         echo "Running KCS Data Update..."
         python data/update_kcs_data.py
 
+    - name: Run Vectorization Cache Update
+      run: |
+        echo "Updating vectorization cache..."
+        python update_vectorization_cache.py
+
     - name: Commit and Push changes
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add data_kcs.json data_kcs_backup.json
+        git add data_kcs.json data_kcs_backup.json vectorization_cache.pkl.gz
         # 변경사항이 있을 때만 커밋
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update KCS data [skip ci]" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update KCS data and cache [skip ci]" && git push)
