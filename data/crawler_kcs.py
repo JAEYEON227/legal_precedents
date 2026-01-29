@@ -302,7 +302,7 @@ if __name__ == "__main__":
     crawler = CustomsCrawler()
 
     print("크롤링 시작...")
-    data = crawler.crawl_data(max_pages=1)  # 테스트용으로 3페이지만
+    data = crawler.crawl_data(max_pages=2)  # 테스트용으로 3페이지만
     
     if data:
         print(f"크롤링 완료! 총 {len(data)}건의 데이터를 수집했습니다.")
